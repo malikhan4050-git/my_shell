@@ -1,6 +1,8 @@
 import sys
 import prompt
 import shutil
+import subprocess
+import os
 
 def main():
     while True:
@@ -28,8 +30,22 @@ def main():
                     print(f"{cmd} is a {path}")
                 else:
                     print(f"{cmd} is not found, sorry!")
+        elif command.startswith("kill "):
+            process_name = command[5:].strip()
+            try:
+                os.system(f"taskkill /f /im {process_name}.exe")
+                print(f"Closed all processes name {process_name}.exe")
+            except Exception as e:
+                print(f"Error killing the process {process_name} : {e}")
         else:
-            print(f"{command}: command not found")
+            path = shutil.which(command)
+            if path:
+                try:
+                    subprocess.run(command, shell=True)
+                except Exception as e:
+                    print(f"Error executing the command: {e}")
+            else:
+                print(f"{command} not found, sorry!")
 
 if __name__ == "__main__":
     main()
