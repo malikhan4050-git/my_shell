@@ -3,6 +3,7 @@ import prompt
 import shutil
 import subprocess
 import os
+from app.parser import parse_command
 
 def main():
     while True:
@@ -17,9 +18,13 @@ def main():
             sys.exit(0)
 
         elif command.startswith("show "):
-            msg = command[5:]
-            print(msg)
-        
+            import shlex
+            try:
+                args = shlex.split(command)
+                print(" " .join(args))
+            except ValueError as e:
+                print(f"Error parsing the command: {e}")
+                       
         elif command.startswith("type "):
             cmd = command[5:].strip()
             builtinTypes = ["exit", "type", "show"]
@@ -57,14 +62,20 @@ def main():
                 print(f"cd : {path} : {e}")
         
         else:
-            path = shutil.which(command)
+            args = parse_command(command)
+            if not args:
+                continue
+
+            program = args[0]
+            path = shutil.which(program)
+
             if path:
                 try:
-                    subprocess.Popen(command, shell=True)
+                    subprocess.run(args, shell=True)
                 except Exception as e:
                     print(f"Error executing the command: {e}")
             else:
-                print(f"{command} not found, sorry!")
+                print(f"{command} command not found, sorry!")
 
 if __name__ == "__main__":
     main()
